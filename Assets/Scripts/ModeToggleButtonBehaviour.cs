@@ -20,12 +20,15 @@ public class ModeToggleButtonBehaviour : MonoBehaviour
 
     public void OnToggleButtonPressed()
     {
+        //change the current mode to opposite
         miningScript.currentMode = (miningScript.currentMode == GameMode.Extract ? GameMode.Scan: GameMode.Extract);
+        //update the button label
         ButtonText.text = (miningScript.currentMode == GameMode.Extract ? "Extract" : "Scan");
     }
 
     private void OnEnable()
     {
+        //start default of extract mode
         ButtonText.text = "Extract";
         
     }

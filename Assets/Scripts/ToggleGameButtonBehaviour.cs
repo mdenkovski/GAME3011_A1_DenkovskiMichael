@@ -9,6 +9,7 @@ public class ToggleGameButtonBehaviour : MonoBehaviour
 
     public void ToggleGame()
     {
+        //activate minigame
         active = !active;
         minigame.SetActive(active);
     }

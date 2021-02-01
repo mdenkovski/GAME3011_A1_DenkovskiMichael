@@ -70,6 +70,7 @@ public class MiningGameScript : MonoBehaviour
     {
         if (transform.childCount != 0) //if we have already have all of the tiles made
         {
+            //remove all the children so we can reset the grid
             for (int i = 0; i < transform.childCount; i++)
             {
                 var child = transform.GetChild(i);
@@ -80,11 +81,14 @@ public class MiningGameScript : MonoBehaviour
         {
             for (int c = 0; c < gridSize; c++)
             {
+                //spawn in the grid tiles and set their indicies
                 grid[r, c] = Instantiate(TilePrefab, gameObject.transform);
                 grid[r, c].GetComponent<TileBehaviour>().SetGridIndices(r, c);
                 
             }
         }
+
+        //reset our restrictions and scoring and update the respective labels
         numScans = 0;
         numExtractions = 0;
         gold = 0;
@@ -95,20 +99,32 @@ public class MiningGameScript : MonoBehaviour
 
         DisplayMessage("");
 
-        UpdateMovesLabels();
+        UpdateNumScansRemaining();
+        UpdateNumExtractionsRemaining();
     }
 
-    void UpdateMovesLabels()
+    //update label for number of extractions remaining
+    void UpdateNumExtractionsRemaining()
     {
         NumExcavationsRemaining.text = (MaxNumExtractions - numExtractions).ToString();
-        NumScansRemaining.text = (MaxNumScans - numScans).ToString();
+
     }
 
+
+    //update label for number of scans remaining
+    void UpdateNumScansRemaining()
+    {
+        NumScansRemaining.text = (MaxNumScans - numScans).ToString();
+
+    }
+    
+    //update label for number of gold
     void UpdateGoldLabel()
     {
         NumGoldText.text = gold.ToString();
     }
 
+    //choose random grid locations to spawn in a resource
     void SpawnResources()
     {
         for (int i = 0; i < NumResourceTiles; i++)
@@ -120,6 +136,7 @@ public class MiningGameScript : MonoBehaviour
         }
     }
 
+    //adds recources for the currounding 2 layers of a point
     void AddResourcesAround(int row, int col)
     {
         //center piece
@@ -158,7 +175,7 @@ public class MiningGameScript : MonoBehaviour
         if (quarterTile.ResourceValue < 1)
         {
             quarterTile.ResourceValue = 1;
-            //grid[row, col].GetComponent<Image>().color = Color.green;
+            //grid[row, col].GetComponent<Image>().color = Color.green; //debug to show the value at start
         }
     }
 
@@ -170,7 +187,7 @@ public class MiningGameScript : MonoBehaviour
         if (HalfTile.ResourceValue < 2)
         {
             HalfTile.ResourceValue = 2;
-            //grid[row, col].GetComponent<Image>().color = Color.yellow;
+            //grid[row, col].GetComponent<Image>().color = Color.yellow; //debug to show the value at start
         }
     }
 
@@ -180,12 +197,12 @@ public class MiningGameScript : MonoBehaviour
         if (mainTile.ResourceValue != 4)
         {
             mainTile.ResourceValue = 4;
-            //grid[row, col].GetComponent<Image>().color = Color.red;
+            //grid[row, col].GetComponent<Image>().color = Color.red; //debug to show the value at start
         }
 
     }
 
-
+    //perform specific action when i tile is pressed based on the game mode
     public void TilePressed(int row, int col)
     {
         if (currentMode == GameMode.Extract)
@@ -207,15 +224,21 @@ public class MiningGameScript : MonoBehaviour
             for (int colOffset = -1; colOffset <= 1; colOffset++)
             {
 
-                DisplayTileColour(row + rowOffset, col + colOffset);
+                DisplayTileColour(row + rowOffset, col + colOffset); //display tile colours for tiles around scan point
                 
             }
         }
 
+        //update the num scans
         numScans++;
-        UpdateMovesLabels();
+        UpdateNumScansRemaining();
     }
 
+    /// <summary>
+    /// display the tile colour based on the resource value of the tile
+    /// </summary>
+    /// <param name="row"></param>
+    /// <param name="col"></param>
     void DisplayTileColour(int row, int col)
     {
         if (row < 0 || row >= gridSize || col < 0 || col >= gridSize) return; // do nothing  if the tile is out of bounds of the grid
@@ -254,20 +277,26 @@ public class MiningGameScript : MonoBehaviour
             {
                 if (rowOffset != 0 || colOffset != 0)
                 {
-                    HalveResource(row + rowOffset, col + colOffset);
+                    HalveResource(row + rowOffset, col + colOffset); //reduce the resources of the surrounding tiles
                 }
             }
         }
-
+        //update num extractions
         numExtractions++;
+        UpdateNumExtractionsRemaining();
 
+        //display a message if at max extractions
         if (numExtractions == 3)
         {
             DisplayMessage("You managed to obtain " + gold + " gold!");
         }
-        UpdateMovesLabels();
     }
 
+    /// <summary>
+    /// consume the resource amount and update labels
+    /// </summary>
+    /// <param name="row"></param>
+    /// <param name="col"></param>
     void CollectResource(int row, int col)
     {
         TileBehaviour Tile = grid[row, col].GetComponent<TileBehaviour>();
@@ -292,6 +321,10 @@ public class MiningGameScript : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// dislay text in the message box
+    /// </summary>
+    /// <param name="message"></param>
     void DisplayMessage(string message)
     {
         Messages.text = message;
